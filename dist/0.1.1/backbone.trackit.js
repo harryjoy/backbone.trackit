@@ -61,14 +61,23 @@
   // Wrap Backbone.History.loadUrl so that all in-app routing
   // can be intercepted with a
   // confirmation if there are any unsaved models.
+  // Backbone.History.prototype.loadUrl = _.wrap(Backbone.History.prototype.loadUrl, function(oldNav, fragment, options) {
+  //   var prompt = getPrompt('unloadRouterPrompt', fragment, options);
+  //   if (prompt) {
+  //     if (confirm(prompt + ' \n\nAre you sure you want to leave this page?')) {
+  //       oldNav.call(this, fragment, options);
+  //     } else {
+  //       history.back(); // go back to previous page
+  //     }
+  //   } else {
+  //     oldNav.call(this, fragment, options);
+  //   }
+  // });
+
   Backbone.History.prototype.loadUrl = _.wrap(Backbone.History.prototype.loadUrl, function(oldNav, fragment, options) {
     var prompt = getPrompt('unloadRouterPrompt', fragment, options);
     if (prompt) {
-      if (confirm(prompt + ' \n\nAre you sure you want to leave this page?')) {
-        oldNav.call(this, fragment, options);
-      } else {
-        history.back(); // go back to previous page
-      }
+      Backbone.Events.trigger('prompt:modelchanges', [this, oldNav, fragment, options]);
     } else {
       oldNav.call(this, fragment, options);
     }
